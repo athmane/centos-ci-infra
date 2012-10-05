@@ -12,6 +12,14 @@ class nginx::ci {
 
     }
 
+    file { "/var/www":
+        ensure      => directory,
+        owner       => root,
+        group       => root,
+        mode        => 755,
+        require     => Service["nginx"],
+    }
+
     service { "nginx":
         enable      => true,
         ensure      => running,
