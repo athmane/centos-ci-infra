@@ -33,12 +33,14 @@ class jenkins {
         command     => "sh -c 'cd /usr/local/bin/ && curl -O http://localhost/jnlpJars/jenkins-cli.jar'",
         path        => ['/bin','/usr/bin','/usr/local/bin'],
         require     => Service["jenkins"],
+        creates     => "/usr/local/bin/jenkins-cli.jar",
    }	
 
    exec { "update-jenkins-updatecenter":
         command     => "curl  -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' | curl -X POST -H 'Accept: application/json' -d @- http://localhost:8080/updateCenter/byId/default/postBack",
         path        => ['/bin','/usr/bin','/usr/local/bin'],
         require     => Service["jenkins"],
+        creates     => "/var/lib/jenkins/hudson.model.UpdateCenter.xml",
    }	
 
    define install_jenkins_plugin($plugin_name) {
@@ -47,7 +49,7 @@ class jenkins {
            command     => "java -jar /usr/local/bin/jenkins-cli.jar -s http://localhost:8080 install-plugin $plugin_name",
            path        => ['/bin','/usr/bin','/usr/local/bin'],
            require     => [ Exec["download-jenkins-cli"], Exec["update-jenkins-updatecenter"]],
-           creates     => "/var/lib/jenkins/plugins/$plugin_name",
+           creates     => "/var/lib/jenkins/plugins/$plugin_name.jpi",
       }
 
    }
