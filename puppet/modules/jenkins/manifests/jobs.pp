@@ -7,6 +7,7 @@ define deploy_jenkins_job($jobname) {
         owner => jenkins,
         group => jenkins,
         mode => 755,
+        require => Package['jenkins'],
     }
     
     file { "/var/lib/jenkins/jobs/$jobname/config.xml":
@@ -14,6 +15,7 @@ define deploy_jenkins_job($jobname) {
         owner => jenkins,
         group => jenkins,
         notify => Service['jenkins'],
+        require => Package['jenkins'],
     }
 
 }

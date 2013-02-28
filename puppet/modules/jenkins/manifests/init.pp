@@ -18,7 +18,7 @@ class jenkins {
 
     package { "jenkins":
         ensure      => present,
-	require	    => [ File["/etc/yum.repos.d/jenkins.repo"], Package["java-1.6.0-openjdk"]],
+        require	    => [ File["/etc/yum.repos.d/jenkins.repo"], Package["java-1.6.0-openjdk"]],
     }
 
     service { "jenkins":
@@ -32,11 +32,13 @@ class jenkins {
    exec { "download-jenkins-cli":
         command     => "sh -c 'cd /usr/local/bin/ && curl -O http://localhost/jnlpJars/jenkins-cli.jar'",
         path        => ['/bin','/usr/bin','/usr/local/bin'],
+        require     => Service["jenkins"],
    }	
 
    exec { "update-jenkins-updatecenter":
         command     => "curl  -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' | curl -X POST -H 'Accept: application/json' -d @- http://localhost:8080/updateCenter/byId/default/postBack",
         path        => ['/bin','/usr/bin','/usr/local/bin'],
+        require     => Service["jenkins"],
    }	
 
    define install_jenkins_plugin($plugin_name) {
@@ -44,9 +46,8 @@ class jenkins {
       exec { "install-plugin-$plugin_name":
            command     => "java -jar /usr/local/bin/jenkins-cli.jar -s http://localhost:8080 install-plugin $plugin_name",
            path        => ['/bin','/usr/bin','/usr/local/bin'],
-           require     => [ Package["jenkins"], Package["java-1.6.0-openjdk"], Exec["download-jenkins-cli"], Exec["update-jenkins-updatecenter"]],
+           require     => [ Exec["download-jenkins-cli"], Exec["update-jenkins-updatecenter"]],
            creates     => "/var/lib/jenkins/plugins/$plugin_name",
-           notify      => Service['jenkins'],
       }
 
    }
