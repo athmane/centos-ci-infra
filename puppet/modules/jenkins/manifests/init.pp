@@ -40,7 +40,6 @@ class jenkins {
         command     => "curl  -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' | curl -X POST -H 'Accept: application/json' -d @- http://localhost:8080/updateCenter/byId/default/postBack",
         path        => ['/bin','/usr/bin','/usr/local/bin'],
         require     => Service["jenkins"],
-        creates     => "/var/lib/jenkins/hudson.model.UpdateCenter.xml",
    }	
 
    define install_jenkins_plugin($plugin_name) {

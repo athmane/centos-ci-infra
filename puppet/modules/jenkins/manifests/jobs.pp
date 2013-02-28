@@ -1,21 +1,29 @@
 class jenkins::jobs {
 
+file { "/var/lib/jenkins/jobs":
+    ensure => directory,
+    owner => jenkins,
+    group => jenkins,
+    mode => 755,
+    require => Package['jenkins'],
+}
+
 define deploy_jenkins_job($jobname) {
-    
+
     file { "/var/lib/jenkins/jobs/$jobname":
         ensure => directory,
         owner => jenkins,
         group => jenkins,
         mode => 755,
-        require => Package['jenkins'],
+        require => [Package['jenkins'],File['/var/lib/jenkins/jobs']],
     }
     
     file { "/var/lib/jenkins/jobs/$jobname/config.xml":
         source => "puppet:///modules/jenkins/jobs/$jobname-config.xml",
         owner => jenkins,
         group => jenkins,
+        require => [Package['jenkins'],File["/var/lib/jenkins/jobs/$jobname"]],
         notify => Service['jenkins'],
-        require => Package['jenkins'],
     }
 
 }
