@@ -1,16 +1,16 @@
 class jenkins::plugins {
 
-    package {"wget": ensure => present, }
+    package {"wget": ensure => present,  }
 
     # Required by jenkins git plugin
-    package {"git":ensure => present,}
+    package {"git":ensure => present, }
 
     file { "/var/lib/jenkins/plugins" :
-          ensure  => directory,
-          owner   => 'jenkins',
-          group   => 'jenkins',
-          mode    => '0755',
-          require => Package["jenkins"],
+          ensure  => directory, 
+          owner   => 'jenkins', 
+          group   => 'jenkins', 
+          mode    => '0755', 
+          require => Package["jenkins"], 
     } 
 
     define install_jenkins_plugin {
@@ -20,23 +20,23 @@ class jenkins::plugins {
 
           exec {
         "download-${name}" :
-          command    => "wget --no-check-certificate ${base_url}${plugin}",
-          cwd        => $plugin_dir,
-          require    => [Package["wget"],File["${plugin_dir}"]],
-          path       => ['/usr/bin', '/usr/sbin',],
-          unless     => "test -f ${plugin_dir}/${plugin}",
+          command    => "wget --no-check-certificate ${base_url}${plugin}", 
+          cwd        => $plugin_dir, 
+          require    => [Package["wget"], File["${plugin_dir}"]], 
+          path       => ['/usr/bin',  '/usr/sbin', ], 
+          unless     => "test -f ${plugin_dir}/${plugin}", 
       }
 
       file {
         "${plugin_dir}/${plugin}" :
-          require => Exec["download-${name}"],
-          owner   => 'jenkins',
-          mode    => '0644',
+          require => Exec["download-${name}"], 
+          owner   => 'jenkins', 
+          mode    => '0644', 
           notify  => Service['jenkins']
       }
     }
 
-   $jenkins_plugins = ["ant" ,"build-timeout" ,"console-column-plugin" ,"cvs" ,"git" ,"gravatar" ,"greenballs" ,"instant-messaging" ,"ircbot" ,"javadoc" ,"maven-plugin" ,"postbuildscript" ,"subversion" ,"throttle-concurrents" ,"translation", "text-finder"] 
+   $jenkins_plugins = [ "ant", "build-timeout", "console-column-plugin", "credentials", "cvs", "external-monitor-job", "git-client", "git", "gravatar", "greenballs", "instant-messaging", "ircbot", "javadoc", "ldap", "mailer", "maven-plugin", "pam-auth", "postbuildscript", "publish-over-ssh", "simple-theme-plugin", "ssh-credentials", "ssh-slaves", "subversion", "text-finder", "throttle-concurrents", "translation"]
 
     install_jenkins_plugin { $jenkins_plugins:; }
 }
