@@ -1,0 +1,6 @@
+[nazar-opennebula]
+name=nazar-opennebula
+baseurl=https://nazar.karan.org/results/opennebula/
+enabled=1
+gpgcheck=0
+

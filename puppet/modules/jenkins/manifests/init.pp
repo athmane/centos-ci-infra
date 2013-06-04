@@ -7,7 +7,7 @@ class jenkins {
     }
 
     file { "/etc/yum.repos.d/jenkins.repo":
-	source => "puppet:///modules/jenkins/jenkins.repo",
+	    source      => "puppet:///modules/jenkins/jenkins.repo",
     }
 
     package {"java-1.6.0-openjdk":
@@ -28,5 +28,12 @@ class jenkins {
     }
 
  
+    file { "/var/lib/jenkins/config.xml":
+	    source      => "puppet:///modules/jenkins/config.xml",
+        require     => Package["jenkins"],
+        owner       => jenkins,
+        group       => jenkins,
+        notify      => Service["jenkins"],
+    }
 
 }

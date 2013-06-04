@@ -1,12 +1,13 @@
 class jenkins::plugins {
 
-    package {"wget":
+    # Required by jenkins git plugin
+    package {"git":
         ensure      => present,
     }
 
     exec {"wait-for-jenkins":
-        require     => [Service["jenkins"], Package["wget"] ],
-        command     => "/usr/bin/wget --spider --tries 20 --retry-connrefused http://localhost:8080/",
+        require     => Service["jenkins"],
+        command     => "sleep 80",
         path        => ['/bin','/usr/bin','/usr/local/bin'],
     }
 
@@ -33,8 +34,9 @@ class jenkins::plugins {
       }
 
    }
+    
 	
-   $jenkins_plugins = ["ant" ,"build-timeout" ,"console-column-plugin" ,"cvs" ,"git" ,"gravatar" ,"greenballs" ,"instant-messaging" ,"ircbot" ,"javadoc" ,"jclouds-jenkins" ,"maven-plugin" ,"postbuildscript" ,"publish-over-ssh" ,"simple-theme-plugin" ,"ssh-slaves" ,"subversion" ,"throttle-concurrents" ,"translation"] 
+   $jenkins_plugins = ["ant" ,"build-timeout" ,"console-column-plugin" ,"cvs" ,"git" ,"gravatar" ,"greenballs" ,"instant-messaging" ,"ircbot" ,"javadoc" ,"maven-plugin" ,"postbuildscript" ,"subversion" ,"throttle-concurrents" ,"translation", "text-finder"] 
 
     install_jenkins_plugin { $jenkins_plugins:; }
 }

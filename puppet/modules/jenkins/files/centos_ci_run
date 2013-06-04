@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# A script to provision vm and run centos testsuite
+# Author: Athmane Madjoudj <athmane@fedoraproject.org>
+# vim: set tabstop=4 expandtab shiftwidth=4 softtabstop=4
+#
+
+import ConfigParser
+import socket
+import subprocess
+import sys
+import time
+import os
+from xml.dom.minidom import parseString
+
+def test_port(address, port):
+    s = socket.socket()
+    try:
+        s.connect((address, port))
+        return True
+    except socket.error, e:
+        return False
+
+class CentOSCI:
+    def __init__(self):
+        self.config = ConfigParser.ConfigParser()
+        self.config.read('/usr/local/etc/centos_ci.cfg')
+
+    def create_vm(self,vm_tmpl, vm_name):
+        print "Creating a VM ..."
+        create_cmd = ['onetemplate', 'instantiate' ,self.config.get('ci',vm_tmpl),
+                     '--user',self.config.get('ci','username'), 
+                     '--password',self.config.get('ci','password'),
+                     '--name',vm_name,
+                     '--endpoint',self.config.get('ci','url')]
+        p = subprocess.Popen(create_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        vm_id = p.stdout.readline().replace('VM ID: ','').replace('\n','')
+        info_cmd = ['onevm', 'show' , vm_id, '--xml',
+                     '--user',self.config.get('ci','username'), 
+                     '--password',self.config.get('ci','password'),
+                     '--endpoint',self.config.get('ci','url')]
+        p2 = subprocess.Popen(info_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        vm_dom = parseString(''.join(p2.stdout.readlines()))
+        vm_ip = vm_dom.getElementsByTagName('IP')[0].firstChild.nodeValue
+        return (vm_id, vm_ip)
+        
+    def ssh_run(self, ip_addr, cmd):
+        key_filename = self.config.get('ci','jenkins_key_path')
+        return  subprocess.call("ssh -o StrictHostKeyChecking=no -i %s root@%s '%s'" % (key_filename,ip_addr,cmd), shell=True)
+
+    def scp_jenkins_workspace(self, ip_addr):
+        key_filename = self.config.get('ci','jenkins_key_path')
+        return  subprocess.call("scp -r -o StrictHostKeyChecking=no -i %s %s root@%s:/root/ " % (key_filename, os.environ['WORKSPACE'], ip_addr), shell=True)
+
+    def terminate_vm(self, vm_id):
+        del_cmd = ['onevm', 'destroy' , vm_id,
+                     '--user',self.config.get('ci','username'), 
+                     '--password',self.config.get('ci','password'),
+                     '--endpoint',self.config.get('ci','url')]
+        return subprocess.call(" ".join(del_cmd), shell=True)
+    
+if __name__ == '__main__':
+    vm_type = sys.argv[1]
+    # TODO: move vm type list to the config file
+    if vm_type in ['c6_32','c6_64','c5_32','c5_64']:
+        ci = CentOSCI()
+        vm_id, vm_ip = ci.create_vm(vm_tmpl = vm_type, vm_name = os.environ['BUILD_TAG'])
+        print 'Waiting for SSHD on %s ...' % (vm_ip,)
+        timeout = time.time() + 60*20 # 20mn
+        while True:
+            time.sleep(30) 
+            if test_port(vm_ip, 22) or time.time() > timeout:
+                break
+       
+        print 'Remove known hosts file ...'
+        os.system('/bin/rm -f /var/lib/jenkins/.ssh/known_hosts')
+        # TODO: Make build steps external
+        testsuite_cmds = [ 'echo nameserver 10.0.10.1 > /etc/resolv.conf',
+                           'cd /root/%s && ./centos_ci_build' % os.path.basename(os.environ['WORKSPACE']),
+                         ]
+        out = 0
+        try:
+            print 'Copying the test suite ...'
+            ci.scp_jenkins_workspace(vm_ip)
+            print 'Running the test suite ...'
+            for testsuite_cmd in testsuite_cmds:
+                out = ci.ssh_run(ip_addr = vm_ip, cmd = testsuite_cmd)
+
+        except Exception, e:
+            print "Can't connect to the VM: %s" % str(e)
+
+        finally:
+            try:
+                print "Terminating the VM ..."
+                ci.terminate_vm(vm_id)
+            except Exception, e2:
+                print "Can't terminate the VM: %s" % str(e2)
+        sys.exit(out)
+
+    else:
+        print 'Invalid VM type.'
+        sys.exit(1)

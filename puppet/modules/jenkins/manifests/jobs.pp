@@ -8,9 +8,9 @@ file { "/var/lib/jenkins/jobs":
     require => Package['jenkins'],
 }
 
-define deploy_jenkins_job($jobname) {
+define create_jenkins_job($vm_type, $git_url) {
 
-    file { "/var/lib/jenkins/jobs/$jobname":
+    file { "/var/lib/jenkins/jobs/$name":
         ensure => directory,
         owner => jenkins,
         group => jenkins,
@@ -18,28 +18,37 @@ define deploy_jenkins_job($jobname) {
         require => [Package['jenkins'],File['/var/lib/jenkins/jobs']],
     }
     
-    file { "/var/lib/jenkins/jobs/$jobname/config.xml":
-        source => "puppet:///modules/jenkins/jobs/$jobname-config.xml",
+    file { "/var/lib/jenkins/jobs/$name/config.xml":
+        content => template('jenkins/config.xml.erb'),
         owner => jenkins,
         group => jenkins,
         require => [Package['jenkins'],File["/var/lib/jenkins/jobs/$jobname"]],
         notify => Service['jenkins'],
     }
 
+
 }
 
-deploy_jenkins_job {"Development-mamu-c5-32": jobname => "Development-mamu-c5-32",}
-deploy_jenkins_job {"Development-mamu-c6-32": jobname => "Development-mamu-c6-32",}
-deploy_jenkins_job {"Development-tigalch-c5-32": jobname => "Development-tigalch-c5-32",}
-deploy_jenkins_job {"Development-tigalch-c6-32": jobname => "Development-tigalch-c6-32",}
-deploy_jenkins_job {"Shadow-c5-32": jobname => "Shadow-c5-32",}
-deploy_jenkins_job {"Shadow-c5-64": jobname => "Shadow-c5-64",}
-deploy_jenkins_job {"Shadow-c6-32bit": jobname => "Shadow-c6-32bit",}
-deploy_jenkins_job {"Shadow-c6-64": jobname => "Shadow-c6-64",}
-deploy_jenkins_job {"t_functional-c5-64": jobname => "t_functional-c5-64",}
-deploy_jenkins_job {"t_functional-c6-64": jobname => "t_functional-c6-64",}
-deploy_jenkins_job {"t_functional-force-kill-rackspace-vms": jobname => "t_functional-force-kill-rackspace-vms",}
+# Jenkins jobs
 
+create_jenkins_job {"t_functional-c5-32": 
+    vm_type => "c5_32", 
+    git_url => "git://gitorious.org/testautomation/t_functional.git",
+}
 
+create_jenkins_job {"t_functional-c5-64": 
+    vm_type => "c5_32", 
+    git_url => "git://gitorious.org/testautomation/t_functional.git",
+}
+
+create_jenkins_job {"t_functional-c6-32": 
+    vm_type => "c5_32", 
+    git_url => "git://gitorious.org/testautomation/t_functional.git",
+}
+
+create_jenkins_job {"t_functional-c6-64": 
+    vm_type => "c5_32", 
+    git_url => "git://gitorious.org/testautomation/t_functional.git",
+}
 
 }
