@@ -12,16 +12,30 @@ class nginx::ci {
 
     }
 
-    file { "/var/www/cstatic":
+    # Recursive did not work in standalone
+    file { ["/var/www", "/var/www/cstatic"]:
         ensure      => directory, 
-        recurse     => true,
         owner       => root,
         group       => root,
         mode        => 0755,
-        source      => "puppet:///modules/nginx/cstatic",
         require     => File["/etc/nginx/nginx.conf"],
     }
 
+    file { "/var/www/cstatic/centos.png":
+        owner       => root,
+        group       => root,
+        mode        => 0644,
+        source      => "puppet:///modules/nginx/centos.png",
+        require     => [File["/etc/nginx/nginx.conf"], File["/var/www/cstatic"]],
+    }
+
+    file { "/var/www/cstatic/godaddy.png":
+        owner       => root,
+        group       => root,
+        mode        => 0644,
+        source      => "puppet:///modules/nginx/godaddy.png",
+        require     => [File["/etc/nginx/nginx.conf"], File["/var/www/cstatic"]],
+    }
     service { "nginx":
         enable      => true,
         ensure      => running,

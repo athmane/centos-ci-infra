@@ -1,41 +1,41 @@
 class jenkins::plugins {
 
+    package {"wget": ensure => present, }
+
     # Required by jenkins git plugin
-    package {"git":
-        ensure      => present,
-    }
+    package {"git":ensure => present,}
 
-    exec {"wait-for-jenkins":
-        require     => Service["jenkins"],
-        command     => "sleep 80",
-        path        => ['/bin','/usr/bin','/usr/local/bin'],
-    }
+    file { "/var/lib/jenkins/plugins" :
+          ensure  => directory,
+          owner   => 'jenkins',
+          group   => 'jenkins',
+          mode    => '0755',
+          require => Package["jenkins"],
+    } 
 
-   exec { "download-jenkins-cli":
-        command     => "sh -c 'cd /usr/local/bin/ && curl -O http://localhost:8080/jnlpJars/jenkins-cli.jar'",
-        path        => ['/bin','/usr/bin','/usr/local/bin'],
-        require     => Exec["wait-for-jenkins"],
-        creates     => "/usr/local/bin/jenkins-cli.jar",
-   }	
+    define install_jenkins_plugin {
+      $plugin            = "${name}.hpi"
+      $plugin_dir        = '/var/lib/jenkins/plugins'
+      $base_url          = 'http://updates.jenkins-ci.org/latest/'
 
-   exec { "update-jenkins-updatecenter":
-        command     => "curl  -L http://updates.jenkins-ci.org/update-center.json | sed '1d;$d' | curl -X POST -H 'Accept: application/json' -d @- http://localhost:8080/updateCenter/byId/default/postBack",
-        path        => ['/bin','/usr/bin','/usr/local/bin'],
-        require     => Exec["wait-for-jenkins"],
-   }	
-
-   define install_jenkins_plugin {
-
-      exec { "install-plugin-$name":
-           command     => "java -jar /usr/local/bin/jenkins-cli.jar -s http://localhost:8080 install-plugin $name",
-           path        => ['/bin','/usr/bin','/usr/local/bin'],
-           require     => [ Exec["download-jenkins-cli"], Exec["update-jenkins-updatecenter"]],
-           creates     => "/var/lib/jenkins/plugins/$name.jpi",
+          exec {
+        "download-${name}" :
+          command    => "wget --no-check-certificate ${base_url}${plugin}",
+          cwd        => $plugin_dir,
+          require    => [Package["wget"],File["${plugin_dir}"]],
+          path       => ['/usr/bin', '/usr/sbin',],
+          unless     => "test -f ${plugin_dir}/${plugin}",
       }
 
-   }
-    
-	
+      file {
+        "${plugin_dir}/${plugin}" :
+          require => Exec["download-${name}"],
+          owner   => 'jenkins',
+          mode    => '0644',
+          notify  => Service['jenkins']
+      }
+    }
+
    $jenkins_plugins = ["ant" ,"build-timeout" ,"console-column-plugin" ,"cvs" ,"git" ,"gravatar" ,"greenballs" ,"instant-messaging" ,"ircbot" ,"javadoc" ,"maven-plugin" ,"postbuildscript" ,"subversion" ,"throttle-concurrents" ,"translation", "text-finder"] 
 
     install_jenkins_plugin { $jenkins_plugins:; }
