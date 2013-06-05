@@ -37,17 +37,17 @@ create_jenkins_job {"t_functional-c5-32":
 }
 
 create_jenkins_job {"t_functional-c5-64": 
-    vm_type => "c5_32", 
+    vm_type => "c5_64", 
     git_url => "git://gitorious.org/testautomation/t_functional.git",
 }
 
 create_jenkins_job {"t_functional-c6-32": 
-    vm_type => "c5_32", 
+    vm_type => "c6_32", 
     git_url => "git://gitorious.org/testautomation/t_functional.git",
 }
 
 create_jenkins_job {"t_functional-c6-64": 
-    vm_type => "c5_32", 
+    vm_type => "c6_64", 
     git_url => "git://gitorious.org/testautomation/t_functional.git",
 }
 
