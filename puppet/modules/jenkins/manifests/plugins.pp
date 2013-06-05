@@ -36,7 +36,32 @@ class jenkins::plugins {
       }
     }
 
-   $jenkins_plugins = [ "ant", "build-timeout", "console-column-plugin", "credentials", "cvs", "external-monitor-job", "git-client", "git", "gravatar", "greenballs", "instant-messaging", "ircbot", "javadoc", "ldap", "mailer", "maven-plugin", "pam-auth", "postbuildscript", "publish-over-ssh", "simple-theme-plugin", "ssh-credentials", "ssh-slaves", "subversion", "text-finder", "throttle-concurrents", "translation"]
+   $jenkins_plugins = [ "ant", 
+                        "build-timeout", 
+                        "console-column-plugin", 
+                        "credentials", 
+                        "cvs", 
+                        "external-monitor-job", 
+                        "git-client", "git", 
+                        "gravatar", 
+                        "greenballs", 
+                        "instant-messaging", 
+                        "ircbot", 
+                        "javadoc", 
+                        "ldap", 
+                        "mailer", 
+                        "maven-plugin", 
+                        "pam-auth", 
+                        "postbuildscript", 
+                        "publish-over-ssh", 
+                        "simple-theme-plugin", 
+                        "ssh-credentials", 
+                        "ssh-slaves", 
+                        "subversion", 
+                        "text-finder", 
+                        "throttle-concurrents", 
+                        "translation",
+                        ]
 
     install_jenkins_plugin { $jenkins_plugins:; }
 }
