@@ -1,17 +1,17 @@
 
 class centos_ci_run {
 
-# Don't manage this file
-#    file { "/usr/local/etc/centos_ci.cfg":
-#        source => "puppet:///modules/centos_ci_run/centos_ci.cfg",
-#	    mode   => 664,	
-#        owner  => root,
-#        group  => root,
-#    }
+    file { "/usr/local/etc/centos_ci.cfg":
+        source => "puppet:///modules/centos_ci_run/centos_ci.cfg",
+	      mode   => 664,	
+        owner  => root,
+        group  => root,
+        replace => false,
+    }
 
     file { "/usr/local/bin/centos_ci_run":
         source => "puppet:///modules/centos_ci_run/centos_ci_run",
-	    mode   => 775,	
+	      mode   => 775,	
         owner  => root,
         group  => root,
     }

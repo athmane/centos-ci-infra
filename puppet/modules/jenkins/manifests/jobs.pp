@@ -16,6 +16,7 @@ class jenkins::jobs {
             group => jenkins,
             mode => 755,
             require => [Package['jenkins'],File['/var/lib/jenkins/jobs']],
+            replace => false,
         }
         
         file { "/var/lib/jenkins/jobs/$name/config.xml":
@@ -24,6 +25,7 @@ class jenkins::jobs {
             group => jenkins,
             require => [Package['jenkins'],File["/var/lib/jenkins/jobs/$jobname"]],
             notify => Service['jenkins'],
+            replace => false,
         }
 
 

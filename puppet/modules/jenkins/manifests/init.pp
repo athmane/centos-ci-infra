@@ -34,6 +34,7 @@ class jenkins {
         owner       => jenkins,
         group       => jenkins,
         notify      => Service["jenkins"],
+        replace => false,
     }
 
 }
