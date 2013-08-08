@@ -36,6 +36,15 @@ class nginx::ci {
         source      => "puppet:///modules/nginx/godaddy.png",
         require     => [File["/etc/nginx/nginx.conf"], File["/var/www/cstatic"]],
     }
+
+    file { "/var/www/cstatic/index.html":
+        owner       => root,
+        group       => root,
+        mode        => 0644,
+        source      => "puppet:///modules/nginx/index.html",
+        require     => [File["/etc/nginx/nginx.conf"], File["/var/www/cstatic"]],
+    }
+ 
     service { "nginx":
         enable      => true,
         ensure      => running,

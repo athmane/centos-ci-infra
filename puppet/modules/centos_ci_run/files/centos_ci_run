@@ -65,7 +65,7 @@ if __name__ == '__main__':
         ci = CentOSCI()
         vm_id, vm_ip = ci.create_vm(vm_tmpl = vm_type, vm_name = os.environ['BUILD_TAG'])
         print 'Waiting for SSHD on %s ...' % (vm_ip,)
-        timeout = time.time() + 60*20 # 20mn
+        timeout = time.time() + 60*40 # 40mn
         while True:
             time.sleep(30) 
             if test_port(vm_ip, 22) or time.time() > timeout:
