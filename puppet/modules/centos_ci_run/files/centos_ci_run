@@ -52,7 +52,7 @@ class CentOSCI:
         return  subprocess.call("scp -r -o StrictHostKeyChecking=no -i %s %s root@%s:/root/ " % (key_filename, os.environ['WORKSPACE'], ip_addr), shell=True)
 
     def terminate_vm(self, vm_id):
-        del_cmd = ['onevm', 'destroy' , vm_id,
+        del_cmd = ['onevm', 'delete' , vm_id,
                      '--user',self.config.get('ci','username'), 
                      '--password',self.config.get('ci','password'),
                      '--endpoint',self.config.get('ci','url')]
