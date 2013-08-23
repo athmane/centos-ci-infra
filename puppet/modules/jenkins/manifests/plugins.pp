@@ -51,6 +51,7 @@ class jenkins::plugins {
                         "ldap", 
                         "mailer", 
                         "maven-plugin", 
+                        "naginator",
                         "pam-auth", 
                         "postbuildscript", 
                         "simple-theme-plugin", 
