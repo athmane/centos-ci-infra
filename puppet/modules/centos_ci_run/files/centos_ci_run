@@ -5,6 +5,7 @@
 #
 
 import ConfigParser
+import signal
 import socket
 import subprocess
 import sys
@@ -17,8 +18,9 @@ def test_port(address, port):
     try:
         s.connect((address, port))
         return True
-    except socket.error, e:
+    except socket.error:
         return False
+
 
 class CentOSCI:
     def __init__(self):
@@ -63,9 +65,17 @@ if __name__ == '__main__':
     # TODO: move vm type list to the config file
     if vm_type in ['c6_32','c6_64','c5_32','c5_64']:
         ci = CentOSCI()
+
         vm_id, vm_ip = ci.create_vm(vm_tmpl = vm_type, vm_name = os.environ['BUILD_TAG'])
+        # SIGTERM handler [THIS IS UGLY]
+        def sigterm_handler(signal, frame):
+            print "Build terminated ..."
+            ci.terminate_vm(vm_id)
+            sys.exit(1)
+        signal.signal(signal.SIGTERM, sigterm_handler)
+
         print 'Waiting for SSHD on %s ...' % (vm_ip,)
-        timeout = time.time() + 60*40 # 40mn
+        timeout = time.time() + 60*40 # 20mn
         while True:
             time.sleep(30) 
             if test_port(vm_ip, 22) or time.time() > timeout:
