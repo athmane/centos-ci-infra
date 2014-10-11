@@ -23,7 +23,7 @@ class centos_ci_run {
     }
 
      package { "opennebula":
-        ensure      => '3.9.80-0.4',
+        ensure      => '4.2.0-0.1',
         require	    => File["/etc/yum.repos.d/_opennebula.repo"],
     }
 
