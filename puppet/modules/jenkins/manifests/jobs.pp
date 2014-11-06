@@ -53,4 +53,8 @@ class jenkins::jobs {
         git_url => "git://gitorious.org/testautomation/t_functional.git",
     }
 
+    create_jenkins_job {"t_functional-c7-64": 
+        vm_type => "c7_64", 
+        git_url => "git://gitorious.org/testautomation/t_functional.git",
+    }
 }
