@@ -63,7 +63,7 @@ class CentOSCI:
 if __name__ == '__main__':
     vm_type = sys.argv[1]
     # TODO: move vm type list to the config file
-    if vm_type in ['c6_32','c6_64','c5_32','c5_64']:
+    if vm_type in ['c7_64', 'c6_32','c6_64','c5_32','c5_64']:
         ci = CentOSCI()
 
         vm_id, vm_ip = ci.create_vm(vm_tmpl = vm_type, vm_name = os.environ['BUILD_TAG'])
